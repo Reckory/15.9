@@ -13,17 +13,17 @@ uint bring_to_human_view(uint val) {
 }
 
 uint* sha1(char* message, uint msize_bytes) {
-    //инициализация
+    //ГЁГ­ГЁГ¶ГЁГ Г«ГЁГ§Г Г¶ГЁГї
     uint A = H[0];
     uint B = H[1];
     uint C = H[2];
     uint D = H[3];
     uint E = H[4];
 
-    // подсчет целого числа блоков
+    // ГЇГ®Г¤Г±Г·ГҐГІ Г¶ГҐГ«Г®ГЈГ® Г·ГЁГ±Г«Г  ГЎГ«Г®ГЄГ®Гў
     uint totalBlockCount = msize_bytes / one_block_size_bytes;
 
-    // подсчет, сколько байт нужно, чтобы дополнить последний блок
+    // ГЇГ®Г¤Г±Г·ГҐГІ, Г±ГЄГ®Г«ГјГЄГ® ГЎГ Г©ГІ Г­ГіГ¦Г­Г®, Г·ГІГ®ГЎГ» Г¤Г®ГЇГ®Г«Г­ГЁГІГј ГЇГ®Г±Г«ГҐГ¤Г­ГЁГ© ГЎГ«Г®ГЄ
     uint needAdditionalBytes =
         one_block_size_bytes - (msize_bytes - totalBlockCount * one_block_size_bytes);
 
@@ -35,34 +35,34 @@ uint* sha1(char* message, uint msize_bytes) {
         totalBlockCount += 1;
     }
 
-    // размер дополненного по всем правилам сообщения
+    // Г°Г Г§Г¬ГҐГ° Г¤Г®ГЇГ®Г«Г­ГҐГ­Г­Г®ГЈГ® ГЇГ® ГўГ±ГҐГ¬ ГЇГ°Г ГўГЁГ«Г Г¬ Г±Г®Г®ГЎГ№ГҐГ­ГЁГї
     uint extendedMessageSize = msize_bytes + needAdditionalBytes;
 
-    // выделяем новый буфер и копируем в него исходный
+    // ГўГ»Г¤ГҐГ«ГїГҐГ¬ Г­Г®ГўГ»Г© ГЎГіГґГҐГ° ГЁ ГЄГ®ГЇГЁГ°ГіГҐГ¬ Гў Г­ГҐГЈГ® ГЁГ±ГµГ®Г¤Г­Г»Г©
     unsigned char* newMessage = new unsigned char[extendedMessageSize];
     memcpy(newMessage, message, msize_bytes);
 
-    // первый бит ставим '1', остальные обнуляем
+    // ГЇГҐГ°ГўГ»Г© ГЎГЁГІ Г±ГІГ ГўГЁГ¬ '1', Г®Г±ГІГ Г«ГјГ­Г»ГҐ Г®ГЎГ­ГіГ«ГїГҐГ¬
     newMessage[msize_bytes] = 0x80;
     memset(newMessage + msize_bytes + 1, 0, needAdditionalBytes - 1);
 
-    // задаем длину исходного сообщения в битах
+    // Г§Г Г¤Г ГҐГ¬ Г¤Г«ГЁГ­Гі ГЁГ±ГµГ®Г¤Г­Г®ГЈГ® Г±Г®Г®ГЎГ№ГҐГ­ГЁГї Гў ГЎГЁГІГ Гµ
     uint* ptr_to_size = (uint*)(newMessage + extendedMessageSize - 4);
     *ptr_to_size = bring_to_human_view(msize_bytes * 8);
 
     ExpendBlock exp_block;
-    //раунды поехали
+    //Г°Г ГіГ­Г¤Г» ГЇГ®ГҐГµГ Г«ГЁ
     for (int i = 0; i < totalBlockCount; i++) {
 
-        // берем текущий блок и дополняем его
+        // ГЎГҐГ°ГҐГ¬ ГІГҐГЄГіГ№ГЁГ© ГЎГ«Г®ГЄ ГЁ Г¤Г®ГЇГ®Г«Г­ГїГҐГ¬ ГҐГЈГ®
         unsigned char* cur_p = newMessage + one_block_size_bytes * i;
         Block block = (Block)cur_p;
 
-        // первые 16 4байтовых чисел
+        // ГЇГҐГ°ГўГ»ГҐ 16 4ГЎГ Г©ГІГ®ГўГ»Гµ Г·ГЁГ±ГҐГ«
         for (int j = 0; j < one_block_size_uints; j++) {
             exp_block[j] = bring_to_human_view(block[j]);
         }
-        // следующие 64...
+        // Г±Г«ГҐГ¤ГіГѕГ№ГЁГҐ 64...
         for (int j = one_block_size_uints; j < block_expend_size_uints; j++) {
             exp_block[j] =
                 exp_block[j - 3] ^
@@ -72,18 +72,18 @@ uint* sha1(char* message, uint msize_bytes) {
             exp_block[j] = cycle_shift_left(exp_block[j], 1);
         }
 
-        // инициализация 
+        // ГЁГ­ГЁГ¶ГЁГ Г«ГЁГ§Г Г¶ГЁГї 
         uint a = H[0];
         uint b = H[1];
         uint c = H[2];
         uint d = H[3];
         uint e = H[4];
 
-        // пересчитываем
+        // ГЇГҐГ°ГҐГ±Г·ГЁГІГ»ГўГ ГҐГ¬
         for (int j = 0; j < block_expend_size_uints; j++) {
             uint f;
             uint k;
-            // в зависимости от раунда считаем по-разному
+            // Гў Г§Г ГўГЁГ±ГЁГ¬Г®Г±ГІГЁ Г®ГІ Г°Г ГіГ­Г¤Г  Г±Г·ГЁГІГ ГҐГ¬ ГЇГ®-Г°Г Г§Г­Г®Г¬Гі
             if (j < 20) {
                 f = (b & c) | ((~b) & d);
                 k = 0x5A827999;
@@ -101,7 +101,7 @@ uint* sha1(char* message, uint msize_bytes) {
                 k = 0xCA62C1D6;
             }
 
-            // перемешивание
+            // ГЇГҐГ°ГҐГ¬ГҐГёГЁГўГ Г­ГЁГҐ
             uint temp = cycle_shift_left(a, 5) + f + e + k + exp_block[j];
             e = d;
             d = c;
@@ -109,7 +109,7 @@ uint* sha1(char* message, uint msize_bytes) {
             b = a;
             a = temp;
         }
-        // пересчитываем
+        // ГЇГҐГ°ГҐГ±Г·ГЁГІГ»ГўГ ГҐГ¬
         A = A + a;
         B = B + b;
         C = C + c;
@@ -117,7 +117,7 @@ uint* sha1(char* message, uint msize_bytes) {
         E = E + e;
     }
 
-    // A,B,C,D,E являются выходными 32б составляющими посчитанного хэша
+    // A,B,C,D,E ГїГўГ«ГїГѕГІГ±Гї ГўГ»ГµГ®Г¤Г­Г»Г¬ГЁ 32ГЎ Г±Г®Г±ГІГ ГўГ«ГїГѕГ№ГЁГ¬ГЁ ГЇГ®Г±Г·ГЁГІГ Г­Г­Г®ГЈГ® ГµГЅГёГ 
     uint* digest = new uint[5];
     digest[0] = A;
     digest[1] = B;
@@ -125,7 +125,7 @@ uint* sha1(char* message, uint msize_bytes) {
     digest[3] = D;
     digest[4] = E;
 
-    // чистим за собой
+    // Г·ГЁГ±ГІГЁГ¬ Г§Г  Г±Г®ГЎГ®Г©
     delete[] newMessage;
     return digest;
 }
